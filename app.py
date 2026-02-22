@@ -43,6 +43,67 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.markdown("""
+<style>
+
+/* Main app gradient */
+.stApp {
+    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+}
+
+/* Title styling */
+h1 {
+    color: #0d3b2e;
+    font-weight: 800;
+}
+
+/* Subheaders */
+h2, h3 {
+    color: #1b5e20;
+}
+
+/* Sidebar gradient - brighter green */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #00c853 0%, #1b5e20 100%);
+}
+
+/* Sidebar labels */
+[data-testid="stSidebar"] label {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Sidebar headers */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: white !important;
+}
+
+/* FIX INPUT BOX TEXT COLOR */
+[data-testid="stSidebar"] input {
+    color: black !important;
+    background-color: white !important;
+    border-radius: 6px;
+}
+
+/* Metric cards */
+[data-testid="metric-container"] {
+    background-color: white;
+    border-radius: 14px;
+    padding: 15px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab"] {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🌾 Sri Lanka Cereal Production Prediction")
 st.markdown(
     "**Predicting cereal production using agricultural and rural development indicators — Explainable ML**"
@@ -100,7 +161,7 @@ shap_values = compute_shap(model, X_train, X_test)
 # -------------------------------------------------
 # Sidebar Inputs
 # -------------------------------------------------
-st.sidebar.header("📥 Input Agricultural Indicators")
+st.sidebar.header("Input Agricultural Indicators")
 
 inputs = {}
 if feature_names:
@@ -121,10 +182,10 @@ if feature_names:
 # Tabs
 # -------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs(
-    ["🎯 Prediction",
-     "📊 Model Performance",
-     "🔍 Explainability",
-     "📈 Data Overview"]
+    ["Prediction",
+     "Model Performance",
+     "Explainability",
+     "Data Overview"]
 )
 
 # -------------------------------------------------
@@ -135,10 +196,46 @@ with tab1:
 
     X_input = np.array([[inputs[col] for col in feature_names]])
     X_scaled = scaler.transform(X_input)
-
     prediction = model.predict(X_scaled)[0]
 
-    st.success(f"Predicted Cereal Production: {prediction:,.2f}")
+    # Display prediction card
+    st.markdown(
+        f"""
+        <div style='
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            margin-bottom: 20px;
+        '>
+            <div style='font-size:18px; color:#2e7d32;'>Predicted Cereal Production</div>
+            <div style='font-size:34px; font-weight:700; color:#0d3b2e;'>
+                {prediction:,.2f}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Historical comparison
+    historical_avg = y_train.mean()
+    difference = prediction - historical_avg
+    percent_change = (difference / historical_avg) * 100
+
+    colA, colB, colC = st.columns(3)
+    colA.metric("Historical Average", f"{historical_avg:,.2f}")
+    colB.metric("Difference", f"{difference:,.2f}")
+    colC.metric("Change (%)", f"{percent_change:.2f}%")
+
+    # Insight summary
+    if percent_change > 0:
+        insight = "The predicted cereal production is above the historical average, indicating favorable agricultural conditions."
+    else:
+        insight = "The predicted cereal production is below the historical average, suggesting potential constraints in agricultural inputs."
+
+    st.markdown("### Model Insight")
+    st.info(insight)
 
     # Save for explainability
     st.session_state["last_scaled_input"] = X_scaled
@@ -175,7 +272,6 @@ with tab2:
 with tab3:
     st.subheader("Explainability — SHAP")
 
-    # Use user input instead of test sample
     if "last_scaled_input" in st.session_state:
 
         X_scaled = st.session_state["last_scaled_input"]
@@ -189,40 +285,33 @@ with tab3:
         shap.plots.waterfall(shap_value[0], show=False)
         st.pyplot(fig)
 
+        # ---- Interpretation Section ----
+        st.write("### 🔎 Interpretation of Key Drivers")
+
+        values = shap_value.values[0]
+
+        contrib_df = pd.DataFrame({
+            "Feature": feature_names,
+            "SHAP Value": values
+        })
+
+        contrib_df["Impact"] = contrib_df["SHAP Value"].abs()
+        contrib_df = contrib_df.sort_values("Impact", ascending=False)
+
+        top_features = contrib_df.head(3)
+
+        for _, row in top_features.iterrows():
+            direction = "increased" if row["SHAP Value"] > 0 else "decreased"
+            st.write(
+                f"• **{row['Feature']}** significantly {direction} the predicted cereal production."
+            )
+
+        st.caption(
+            "Positive SHAP values increase the prediction, while negative values decrease it."
+        )
+
     else:
         st.info("Adjust inputs in Prediction tab first.")
-
-# -----------------------------
-# Automatic Explanation Section
-# -----------------------------
-
-st.write("### 🔎 Interpretation of Feature Contributions")
-
-values = shap_value.values[0]
-features = feature_names
-
-# Create DataFrame for interpretation
-contrib_df = pd.DataFrame({
-    "Feature": features,
-    "SHAP Value": values
-})
-
-# Sort by impact magnitude
-contrib_df["Impact"] = contrib_df["SHAP Value"].abs()
-contrib_df = contrib_df.sort_values("Impact", ascending=False)
-
-top_features = contrib_df.head(3)
-
-for _, row in top_features.iterrows():
-    direction = "increased" if row["SHAP Value"] > 0 else "decreased"
-    st.write(
-        f"• **{row['Feature']}** significantly {direction} the predicted cereal production."
-    )
-
-st.info(
-    "Positive SHAP values push the prediction higher. "
-    "Negative SHAP values reduce the predicted production level."
-)
 # -------------------------------------------------
 # Data Overview
 # -------------------------------------------------
