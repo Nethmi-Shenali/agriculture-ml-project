@@ -191,6 +191,38 @@ with tab3:
 
     else:
         st.info("Adjust inputs in Prediction tab first.")
+
+# -----------------------------
+# Automatic Explanation Section
+# -----------------------------
+
+st.write("### 🔎 Interpretation of Feature Contributions")
+
+values = shap_value.values[0]
+features = feature_names
+
+# Create DataFrame for interpretation
+contrib_df = pd.DataFrame({
+    "Feature": features,
+    "SHAP Value": values
+})
+
+# Sort by impact magnitude
+contrib_df["Impact"] = contrib_df["SHAP Value"].abs()
+contrib_df = contrib_df.sort_values("Impact", ascending=False)
+
+top_features = contrib_df.head(3)
+
+for _, row in top_features.iterrows():
+    direction = "increased" if row["SHAP Value"] > 0 else "decreased"
+    st.write(
+        f"• **{row['Feature']}** significantly {direction} the predicted cereal production."
+    )
+
+st.info(
+    "Positive SHAP values push the prediction higher. "
+    "Negative SHAP values reduce the predicted production level."
+)
 # -------------------------------------------------
 # Data Overview
 # -------------------------------------------------
