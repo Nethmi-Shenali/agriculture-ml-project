@@ -69,8 +69,12 @@ def load_artifacts():
 model, scaler, feature_names = load_artifacts()
 
 if model is None or scaler is None:
-    st.warning("⚠️ Train the model first using: python src/train.py")
-    st.stop()
+    st.info("Training model for first time...")
+
+    from src.train import train_model
+    train_model()
+
+    model, scaler, feature_names = load_artifacts()
 
 # -------------------------------------------------
 # Load ML Data
