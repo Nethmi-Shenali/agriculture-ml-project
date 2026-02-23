@@ -4,14 +4,6 @@ Academic, policy-relevant ML project: regression on cereal production with SHAP 
 
 ## How to see the folder structure
 
-- **In File Explorer:** Open `C:\Users\Shenali\Desktop\L4S1\ML\agriculture-ml-project`. You should see `data/`, `models/`, `src/`, `app.py`, `requirements.txt`, and `README.md`.
-- **In VS Code / Cursor:** Open the folder **File → Open Folder** and choose `agriculture-ml-project`. The left sidebar shows the tree.
-- **In terminal:** From the project folder run:
-  ```bash
-  dir /s /b
-  ```
-  (or `tree /f` if you have `tree`). Or in PowerShell: `Get-ChildItem -Recurse | Select-Object FullName`.
-
 ## Project structure
 
 ```
@@ -80,19 +72,7 @@ agriculture-ml-project/
    - **Model Performance:** RMSE, R², actual vs predicted plot.
    - **Explainability:** SHAP summary and waterfall.
    - **Data Overview:** table and correlation heatmap.
-
-## Report structure (suggested)
-
-1. Introduction  
-2. Problem Statement  
-3. Dataset Description  
-4. Preprocessing  
-5. Model Selection  
-6. Training & Hyperparameters  
-7. Evaluation Metrics  
-8. Explainability Results  
-9. Critical Discussion  
-10. Conclusion  
+  
 
 ## Tech stack
 
