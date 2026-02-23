@@ -2,8 +2,6 @@
 
 Academic, policy-relevant ML project: regression on cereal production with SHAP explainability and a Streamlit dashboard.
 
-## How to see the folder structure
-
 ## Project structure
 
 ```
