@@ -209,10 +209,10 @@ with tab1:
             text-align: center;
             margin-bottom: 20px;
         '>
-            <div style='font-size:18px; color:#2e7d32;'>Predicted Cereal Production</div>
-            <div style='font-size:34px; font-weight:700; color:#0d3b2e;'>
-                {prediction:,.2f}
-            </div>
+        <div style='font-size:18px; color:#2e7d32;'>Predicted Cereal Production (Metric Tons)</div>
+        <div style='font-size:34px; font-weight:700; color:#0d3b2e;'>
+            {prediction:,.2f} MT
+        </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -277,7 +277,11 @@ with tab3:
         X_scaled = st.session_state["last_scaled_input"]
 
         explainer = shap.Explainer(model, X_train)
+
         shap_value = explainer(X_scaled)
+
+        # Assign correct feature names
+        shap_value.feature_names = feature_names
 
         st.write("### Feature Contribution to This Prediction")
 

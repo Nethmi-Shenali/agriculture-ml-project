@@ -70,6 +70,17 @@ def train_model():
 
     print("Best params:", grid_search.best_params_)
 
+    print("\nBest Parameters Found:")
+    print(grid_search.best_params_)
+
+    print("\nBest Cross-Validation Score:")
+    print(grid_search.best_score_)
+
+    print("\nFull CV Results:")
+    import pandas as pd
+    cv_results = pd.DataFrame(grid_search.cv_results_)
+    print(cv_results[["params", "mean_test_score", "std_test_score"]])
+
     joblib.dump(model, os.path.join(MODELS_DIR, "trained_model.pkl"))
     joblib.dump(scaler, os.path.join(MODELS_DIR, "scaler.pkl"))
     joblib.dump(feature_names, os.path.join(MODELS_DIR, "feature_names.pkl"))
